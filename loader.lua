@@ -2,9 +2,7 @@
     ═══════════════════════════════════════════════════════════════════
     PULSE HUB — LOADER GITHUB
     ═══════════════════════════════════════════════════════════════════
-    Charge pulsehub.lua depuis GitHub et l'exécute.
-    
-    Repo  : prompt012345/pulsehub
+    Repo    : prompt012345/pulsehub
     Fichier : pulsehub.lua
     ═══════════════════════════════════════════════════════════════════
 --]]
@@ -20,9 +18,6 @@ local CONFIG = {
     FORCE_REFRESH = false,
 }
 
---============================================================
--- SERVICES
---============================================================
 local Players      = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local HttpService  = game:GetService("HttpService")
@@ -44,17 +39,13 @@ end
 
 local function writeLocal(path, content)
     if not hasFS then return false end
-    local ok = pcall(writefile, path, content)
-    return ok
+    return pcall(writefile, path, content)
 end
 
 local function localFileExists(path)
     if not hasFS then return false end
-    if type(isfile) == "function" then
-        local ok, res = pcall(isfile, path)
-        return ok and res
-    end
-    return false
+    local ok, res = pcall(isfile, path)
+    return ok and res
 end
 
 --============================================================
@@ -178,7 +169,6 @@ local function main()
     local remoteVersionURL = CONFIG.BASE_URL .. CONFIG.VERSION_FILE
     local bundleURL        = CONFIG.BASE_URL .. CONFIG.BUNDLE_FILE
 
-    -- 1. Version distante
     local remoteVersion, remoteData = nil, nil
     if CONFIG.AUTO_CHECK or CONFIG.FORCE_REFRESH then
         local raw = httpGet(remoteVersionURL)
@@ -191,10 +181,8 @@ local function main()
         end
     end
 
-    -- 2. Version locale
     local localVersion = readLocal(CONFIG.CACHE_VERSION)
 
-    -- 3. Faut-il télécharger ?
     local needDownload = false
     local updateMsg    = nil
 
@@ -210,7 +198,6 @@ local function main()
         end
     end
 
-    -- 4. Téléchargement
     local bundleSrc = nil
     if needDownload then
         local ok, body = pcall(httpGet, bundleURL)
@@ -239,7 +226,6 @@ local function main()
         end
     end
 
-    -- 5. Load
     if not bundleSrc then
         quickNotify("❌  Erreur fatale",
             "Aucune source disponible. Vérifie l'URL ou ta connexion.",
@@ -268,9 +254,6 @@ local function main()
     end
 end
 
---============================================================
--- GO
---============================================================
 task.spawn(function()
     local ok, err = pcall(main)
     if not ok then
