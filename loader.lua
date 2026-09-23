@@ -15,7 +15,7 @@ local CONFIG = {
     CACHE_BUNDLE  = "pulsehub_cache.lua",
     CACHE_VERSION = "pulsehub_version.txt",
     AUTO_CHECK    = true,
-    FORCE_REFRESH = false,
+    FORCE_REFRESH = true,
 }
 
 local Players      = game:GetService("Players")
