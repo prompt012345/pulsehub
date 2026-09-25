@@ -1,19 +1,18 @@
 --[[
     ═══════════════════════════════════════════════════════════════════
-    ⚡ PULSE HUB · v3.0 · Ultimate Edition
+    ⚡ PULSE HUB · v3.1 · Ultimate Edition
     ═══════════════════════════════════════════════════════════════════
     github.com/prompt012345/pulsehub
-    ─────────────────────────────────────────────────────────────────
-    Modules (17) :
+    Modules (17+) :
       Movement : Fly · Noclip · Infinite Jump
       Player   : WalkSpeed · JumpPower · Teleport · Actions
       Visuals  : Invisibilité · Fullbright · ESP+Armes
                  Skin Changer · Texture Simplifier · Vortex
       Camera   : Free Cam
-      Combat   : Aimbot · Trigger Bot · Aimbot Proximité (priorité armes)
+      Combat   : Aimbot (+mode armés) · Trigger Bot
+                 Aimbot Proximité (+priorité/only armés)
       Utility  : Info serveur
-    ─────────────────────────────────────────────────────────────────
-    Contrôles : RightShift = UI · Chaque module a son keybind
+    Contrôles : RightShift = UI
     ═══════════════════════════════════════════════════════════════════
 --]]
 
@@ -36,7 +35,6 @@ local C = {
     bg          = Color3.fromRGB(12, 12, 18),
     bgGrad      = Color3.fromRGB(24, 18, 42),
     panel       = Color3.fromRGB(18, 18, 28),
-    panelLight  = Color3.fromRGB(26, 26, 38),
     elem        = Color3.fromRGB(30, 30, 44),
     elemHover   = Color3.fromRGB(42, 42, 60),
     accent      = Color3.fromRGB(167, 139, 250),
@@ -95,7 +93,7 @@ local function root()
 end
 
 -- ═══════════════════════════════════════════════════════════════════
--- DÉTECTION D'ARME (global)
+-- DÉTECTION D'ARME
 -- ═══════════════════════════════════════════════════════════════════
 local WEAPON_KEYWORDS = {
     "sword","knife","gun","pistol","rifle","shotgun","bow","arrow",
@@ -156,7 +154,6 @@ local function getWeapon(c)
     return nil
 end
 
--- Cache pour optimiser
 local weaponCache, weaponCacheTime = {}, {}
 local WEAPON_CACHE_DURATION = 0.5
 local function playerHasWeaponCached(pl, c)
@@ -199,14 +196,12 @@ do
         t.BorderSizePixel = 0
         corner(t, 10)
         local s = stroke(t, col, 1.5, 0.3)
-
         local accent = Instance.new("Frame", t)
         accent.Size = UDim2.new(0, 3, 1, -20)
         accent.Position = UDim2.new(0, 9, 0, 10)
         accent.BackgroundColor3 = col
         accent.BorderSizePixel = 0
         corner(accent, 2)
-
         local ico = Instance.new("TextLabel", t)
         ico.Size = UDim2.new(0, 26, 0, 26)
         ico.Position = UDim2.new(0, 22, 0, 12)
@@ -216,7 +211,6 @@ do
         ico.TextSize = 16
         ico.TextColor3 = col
         ico.TextXAlignment = Enum.TextXAlignment.Left
-
         local a = Instance.new("TextLabel", t)
         a.Size = UDim2.new(1, -60, 0, 20)
         a.Position = UDim2.new(0, 50, 0, 12)
@@ -226,7 +220,6 @@ do
         a.TextSize = 13
         a.TextColor3 = col
         a.TextXAlignment = Enum.TextXAlignment.Left
-
         local b = Instance.new("TextLabel", t)
         b.Size = UDim2.new(1, -60, 0, 26)
         b.Position = UDim2.new(0, 50, 0, 32)
@@ -236,7 +229,6 @@ do
         b.TextSize = 12
         b.TextColor3 = C.txt
         b.TextXAlignment = Enum.TextXAlignment.Left
-
         local pr = Instance.new("Frame", t)
         pr.Size = UDim2.new(1, -18, 0, 2)
         pr.Position = UDim2.new(0, 9, 1, -4)
@@ -244,7 +236,6 @@ do
         pr.BorderSizePixel = 0
         corner(pr, 1)
         tw(pr, dur or 4, { Size = UDim2.new(0, 0, 0, 2) })
-
         task.delay(dur or 4, function()
             tw(t, 0.3, { BackgroundTransparency = 1 })
             task.wait(0.35)
@@ -286,7 +277,6 @@ do
     gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     UI.gui = gui
 
-    -- Bouton flottant
     local floatBtn = Instance.new("TextButton", gui)
     floatBtn.Size = UDim2.new(0, 62, 0, 62)
     floatBtn.Position = UDim2.new(1, -84, 1, -160)
@@ -312,7 +302,6 @@ do
         end
     end)
 
-    -- Fenêtre
     local w = Instance.new("Frame", gui)
     w.Size = isMobile and UDim2.new(0, 420, 0, 540) or UDim2.new(0, 640, 0, 460)
     w.Position = UDim2.new(0.5, isMobile and -210 or -320, 0.5, isMobile and -270 or -230)
@@ -325,7 +314,6 @@ do
     stroke(w, C.accent, 1.5, 0.5)
     UI.window = w
 
-    -- Barre de titre
     local tb = Instance.new("Frame", w)
     tb.Size = UDim2.new(1, 0, 0, 54)
     tb.BackgroundColor3 = C.panel
@@ -379,7 +367,7 @@ do
     sub.Size = UDim2.new(0, 250, 0, 14)
     sub.Position = UDim2.new(0, 62, 0, 30)
     sub.BackgroundTransparency = 1
-    sub.Text = "Ultimate Edition · v3.0 · " .. (isMobile and "Mobile" or "PC")
+    sub.Text = "Ultimate · v3.1 · " .. (isMobile and "Mobile" or "PC")
     sub.Font = Enum.Font.Gotham
     sub.TextSize = 10
     sub.TextColor3 = C.txtdim
@@ -413,19 +401,15 @@ do
     xb.BorderSizePixel = 0
     xb.AutoButtonColor = false
     corner(xb, 8)
-    xb.MouseEnter:Connect(function() tw(xb, 0.15, { BackgroundColor3 = C.danger, TextColor3 = C.txt }) end)
-    xb.MouseLeave:Connect(function() tw(xb, 0.15, { BackgroundColor3 = C.elem, TextColor3 = C.txtdim }) end)
     xb.MouseButton1Click:Connect(function()
         w.Visible = false
         floatBtn.Visible = true
     end)
-
     floatBtn.MouseButton1Click:Connect(function()
         w.Visible = true
         floatBtn.Visible = false
     end)
 
-    -- Sidebar
     local sbW = isMobile and 130 or 160
     local sb = Instance.new("Frame", w)
     sb.Size = UDim2.new(0, sbW, 1, -56)
@@ -444,7 +428,6 @@ do
     ct.BackgroundTransparency = 1
     ct.BorderSizePixel = 0
 
-    -- Tab function (retourne existant si déjà créé)
     function UI:tab(name, icon)
         if UI.tabs[name] then return UI.tabs[name].fr end
 
@@ -502,17 +485,6 @@ do
 
         UI.tabs[name] = { fr = fr, btn = btn, ind = ind, ic = ic, lbl = lbl }
 
-        btn.MouseEnter:Connect(function()
-            if UI.tabs[name].fr.Visible then return end
-            tw(btn, 0.15, { BackgroundTransparency = 0.4 })
-            tw(lbl, 0.15, { TextColor3 = C.txt })
-        end)
-        btn.MouseLeave:Connect(function()
-            if UI.tabs[name].fr.Visible then return end
-            tw(btn, 0.15, { BackgroundTransparency = 0.7 })
-            tw(lbl, 0.15, { TextColor3 = C.txtdim })
-        end)
-
         btn.MouseButton1Click:Connect(function()
             for n, t in pairs(UI.tabs) do
                 local a = (n == name)
@@ -547,7 +519,6 @@ do
         local holder = Instance.new("Frame", parent)
         holder.Size = UDim2.new(1, 0, 0, 26)
         holder.BackgroundTransparency = 1
-
         local bar = Instance.new("Frame", holder)
         bar.Size = UDim2.new(0, 3, 0, 16)
         bar.Position = UDim2.new(0, 0, 0.5, -8)
@@ -555,7 +526,6 @@ do
         bar.BorderSizePixel = 0
         corner(bar, 2)
         grad(bar, C.accent, C.accentPink, 90)
-
         local l = Instance.new("TextLabel", holder)
         l.Size = UDim2.new(1, -14, 1, 0)
         l.Position = UDim2.new(0, 12, 0, 0)
@@ -637,14 +607,6 @@ do
         end
         ap(st, true)
 
-        b.MouseEnter:Connect(function()
-            tw(r, 0.15, { BackgroundColor3 = C.elemHover })
-            tw(rs, 0.15, { Color = C.accent, Transparency = 0.5 })
-        end)
-        b.MouseLeave:Connect(function()
-            tw(r, 0.15, { BackgroundColor3 = C.elem })
-            tw(rs, 0.15, { Color = C.txtfaint, Transparency = 0.75 })
-        end)
         b.MouseButton1Click:Connect(function() ap(not st) end)
 
         if opts.keybind then
@@ -769,15 +731,6 @@ do
         b.AutoButtonColor = false
         corner(b, 9)
         local s = stroke(b, C.txtfaint, 1, 0.75)
-
-        b.MouseEnter:Connect(function()
-            tw(b, 0.15, { BackgroundColor3 = C.accentDim })
-            tw(s, 0.15, { Color = C.accentBright, Transparency = 0.3 })
-        end)
-        b.MouseLeave:Connect(function()
-            tw(b, 0.15, { BackgroundColor3 = C.elem })
-            tw(s, 0.15, { Color = C.txtfaint, Transparency = 0.75 })
-        end)
         b.MouseButton1Click:Connect(function()
             if cb then pcall(cb) end
         end)
@@ -799,7 +752,6 @@ end
 do
     local t = UI:tab("Movement", "✈")
     UI:section(t, "Vol")
-
     local spd = 65
     local bv, bg, cn, vl = nil, nil, nil, Vector3.zero
 
@@ -1089,7 +1041,6 @@ do
         end
         cn = RunService.RenderStepped:Connect(function(dt)
             pulse = pulse + dt * 4
-
             local cm = workspace.CurrentCamera
             local myRoot = root()
             if not myRoot then
@@ -1097,22 +1048,18 @@ do
                 return
             end
             local myPos = myRoot.Position
-
             for _, pl in ipairs(Players:GetPlayers()) do
                 if pl == LP then continue end
                 local c = pl.Character
                 local h = c and c:FindFirstChildOfClass("Humanoid")
                 local r = c and c:FindFirstChild("HumanoidRootPart")
                 local hd = c and c:FindFirstChild("Head")
-
                 if not (h and r and h.Health > 0) then
                     cleanup(pl)
                     continue
                 end
-
                 local d = (r.Position - myPos).Magnitude
                 if d > state.maxDist then cleanup(pl) continue end
-
                 local sp, onScr = cm:WorldToViewportPoint(r.Position)
                 if not onScr then
                     if dr[pl] then
@@ -1120,12 +1067,8 @@ do
                     end
                     continue
                 end
-
                 local weapon = nil
-                if state.weaponDetect then
-                    weapon = getWeapon(c)
-                end
-
+                if state.weaponDetect then weapon = getWeapon(c) end
                 if not dr[pl] then
                     dr[pl] = {}
                     if state.box then
@@ -1162,15 +1105,12 @@ do
                     dr[pl].warn.Center = true
                     dr[pl].warn.Outline = true
                 end
-
                 local headPos = hd and hd.Position or (r.Position + Vector3.new(0, 1.5, 0))
                 local top = cm:WorldToViewportPoint(headPos + Vector3.new(0, 1, 0))
                 local bot = cm:WorldToViewportPoint(r.Position - Vector3.new(0, 3, 0))
-
                 local height = math.abs(top.Y - bot.Y)
                 local width = height * 0.55
                 local col = colorFor(pl, weapon)
-
                 if dr[pl].box then
                     dr[pl].box.Size = Vector2.new(width, height)
                     dr[pl].box.Position = Vector2.new(sp.X - width/2, top.Y)
@@ -1178,7 +1118,6 @@ do
                     dr[pl].box.Thickness = weapon and 2.5 or 1.5
                     dr[pl].box.Visible = true
                 end
-
                 if dr[pl].hb and dr[pl].hf then
                     local hr = math.clamp(h.Health / h.MaxHealth, 0, 1)
                     local bx = sp.X - width/2 - 6
@@ -1191,7 +1130,6 @@ do
                     dr[pl].hf.Color = C.success:Lerp(C.danger, 1 - hr)
                     dr[pl].hf.Visible = true
                 end
-
                 if dr[pl].name then
                     dr[pl].name.Position = Vector2.new(sp.X, top.Y - 18)
                     dr[pl].name.Text = pl.Name
@@ -1259,7 +1197,6 @@ end
 do
     local t = UI:tab("Camera", "📷")
     UI:section(t, "Caméra libre")
-
     local spd = 1.5
     local active = false
     local camPos, camRot, cn = nil, nil, nil
@@ -1307,7 +1244,7 @@ do
 end
 
 -- ═══════════════════════════════════════════════════════════════════
--- MODULE : AIMBOT
+-- MODULE : AIMBOT CLASSIQUE
 -- ═══════════════════════════════════════════════════════════════════
 do
     local t = UI:tab("Combat", "🎯")
@@ -1323,6 +1260,7 @@ do
         wallCheck = true,
         showFov = true,
         maxDist = 1000,
+        onlyArmed = false,
     }
 
     local hasD = Drawing and Drawing.new
@@ -1392,6 +1330,12 @@ do
             if not (h and r and h.Health > 0) then continue end
             local d = (r.Position - myPos).Magnitude
             if d > state.maxDist then continue end
+
+            -- 🎯 Mode uniquement armés
+            if state.onlyArmed then
+                if not playerHasWeaponCached(pl, c) then continue end
+            end
+
             local part = getPart(c)
             if not part then continue end
             local sp, onScr = cm:WorldToViewportPoint(part.Position)
@@ -1468,7 +1412,6 @@ do
     UI:slider(t, "  FOV", 20, 400, 130, function(v) state.fov = v end)
     UI:slider(t, "  Lissage", 0, 0.95, 0.25, function(v) state.smooth = v end)
 
-    -- Barre de distance avec affichage live
     local distText = Instance.new("TextLabel", t)
     distText.Size = UDim2.new(1, 0, 0, 22)
     distText.BackgroundTransparency = 1
@@ -1482,6 +1425,15 @@ do
         state.maxDist = v
         distText.Text = "  Activation à : " .. v .. " studs"
     end)
+
+    UI:toggle(t, "🎯 Uniquement les ARMÉS", false, function(v)
+        state.onlyArmed = v
+        if v then
+            Notify:push("Aimbot", "Mode UNIQUEMENT ARMÉS", 3, C.danger)
+        else
+            Notify:push("Aimbot", "Mode armés désactivé", 2, C.accent)
+        end
+    end, { keybind = "AimOnlyArmed2", defaultKey = Enum.KeyCode.U, keyName = "U" })
 
     UI:toggle(t, "  Team check", true, function(v) state.teamCheck = v end)
     UI:toggle(t, "  Wall check", true, function(v) state.wallCheck = v end)
@@ -1506,15 +1458,15 @@ do
     UI:section(t, "Trigger Bot")
 
     local state = {
-        enabled     = false,
-        delay       = 0.05,
-        range       = 500,
-        hitboxSize  = 30,
-        teamCheck   = true,
-        wallCheck   = true,
-        headOnly    = false,
-        showHitbox  = true,
-        bypassJump  = true,
+        enabled = false,
+        delay = 0.05,
+        range = 500,
+        hitboxSize = 30,
+        teamCheck = true,
+        wallCheck = true,
+        headOnly = false,
+        showHitbox = true,
+        bypassJump = true,
     }
 
     local fireMethod = "unknown"
@@ -1623,7 +1575,6 @@ do
 
     local cn
     local lastFire = 0
-
     local function start()
         cn = RunService.RenderStepped:Connect(function()
             if hitboxCircle then
@@ -1636,9 +1587,7 @@ do
                     hitboxCircle.Visible = false
                 end
             end
-
             if not state.enabled then return end
-
             if state.bypassJump then
                 local h = hum()
                 if h then
@@ -1649,7 +1598,6 @@ do
                     end
                 end
             end
-
             if os.clock() - lastFire < state.delay then return end
             local tgt = getTargetUnderCrosshair()
             if not tgt then return end
@@ -1678,7 +1626,6 @@ do
     UI:slider(t, "  Délai entre tirs", 0.01, 0.5, 0.05, function(v) state.delay = v end)
     UI:slider(t, "  Taille zone curseur", 5, 100, 30, function(v) state.hitboxSize = v end)
     UI:slider(t, "  Portée max", 50, 2000, 500, function(v) state.range = v end)
-
     UI:toggle(t, "  Tirer tête uniquement", false, function(v) state.headOnly = v end)
     UI:toggle(t, "  Cercle visuel", true, function(v)
         state.showHitbox = v
@@ -1690,23 +1637,24 @@ do
 end
 
 -- ═══════════════════════════════════════════════════════════════════
--- MODULE : AIMBOT PROXIMITÉ (auto + priorité armes)
+-- MODULE : AIMBOT PROXIMITÉ
 -- ═══════════════════════════════════════════════════════════════════
 do
     local t = UI:tab("Combat")
     UI:section(t, "Aimbot Proximité")
 
     local state = {
-        enabled         = false,
-        range           = 15,
-        smooth          = 0.35,
-        part            = "Head",
-        teamCheck       = true,
-        wallCheck       = false,
-        visibleOnly     = true,
-        showRange       = true,
-        targetDot       = true,
+        enabled = false,
+        range = 15,
+        smooth = 0.35,
+        part = "Head",
+        teamCheck = true,
+        wallCheck = false,
+        visibleOnly = true,
+        showRange = true,
+        targetDot = true,
         prioritizeArmed = false,
+        onlyArmed = false,
         armedRangeBonus = 0,
     }
 
@@ -1797,8 +1745,13 @@ do
             if not visibleFromCam(target) then continue end
 
             local armed = false
-            if state.prioritizeArmed then
+            if state.onlyArmed or state.prioritizeArmed then
                 armed = playerHasWeaponCached(pl, c)
+            end
+
+            -- 🎯 Mode uniquement armés : ignore tout non-armé
+            if state.onlyArmed and not armed then
+                continue
             end
 
             if armed then
@@ -1812,6 +1765,7 @@ do
             end
         end
 
+        if state.onlyArmed then return bestArmed end
         if state.prioritizeArmed and bestArmed then return bestArmed end
         if not bestArmed then return bestNormal end
         if not bestNormal then return bestArmed end
@@ -1831,13 +1785,11 @@ do
                     rangePart.Transparency = 1
                 end
             end
-
             local tgt = findClosest()
             if not tgt then
                 if targetMark then targetMark.Transparency = 1 end
                 return
             end
-
             if targetMark then
                 targetMark.Position = tgt.part.Position
                 targetMark.Transparency = 0.2
@@ -1849,7 +1801,6 @@ do
                     targetMark.Size = Vector3.new(0.5, 0.5, 0.5)
                 end
             end
-
             local cm = workspace.CurrentCamera
             local goal = CFrame.new(cm.CFrame.Position, tgt.part.Position)
             if state.smooth >= 0.99 then
@@ -1880,7 +1831,7 @@ do
     local rangeText = Instance.new("TextLabel", t)
     rangeText.Size = UDim2.new(1, 0, 0, 24)
     rangeText.BackgroundTransparency = 1
-    rangeText.Text = "  Distance d'activation : " .. state.range .. " studs"
+    rangeText.Text = "  Distance : " .. state.range .. " studs"
     rangeText.Font = Enum.Font.GothamBold
     rangeText.TextSize = 12
     rangeText.TextColor3 = C.accentBright
@@ -1889,13 +1840,12 @@ do
     local rangeSlider
     rangeSlider = UI:slider(t, "Rayon (studs)", 5, 150, state.range, function(v)
         state.range = v
-        rangeText.Text = "  Distance d'activation : " .. v .. " studs"
+        rangeText.Text = "  Distance : " .. v .. " studs"
         if rangePart then
             rangePart.Size = Vector3.new(0.1, v * 2, v * 2)
         end
     end)
 
-    -- Boutons rapides
     local quickRow = Instance.new("Frame", t)
     quickRow.Size = UDim2.new(1, 0, 0, 34)
     quickRow.BackgroundTransparency = 1
@@ -1915,7 +1865,7 @@ do
         b.MouseButton1Click:Connect(function()
             state.range = val
             rangeSlider.set(val)
-            rangeText.Text = "  Distance d'activation : " .. val .. " studs"
+            rangeText.Text = "  Distance : " .. val .. " studs"
             if rangePart then
                 rangePart.Size = Vector3.new(0.1, val * 2, val * 2)
             end
@@ -1931,20 +1881,31 @@ do
     UI:slider(t, "  Lissage", 0, 0.95, 0.35, function(v) state.smooth = v end)
 
     UI:section(t, "Priorité des cibles")
-    UI:toggle(t, "🎯 Prioriser les joueurs armés", false, function(v)
+
+    UI:toggle(t, "🎯 Uniquement les ARMÉS", false, function(v)
+        state.onlyArmed = v
+        if v then
+            state.prioritizeArmed = false
+            Notify:push("Aimbot", "Mode UNIQUEMENT ARMÉS", 3, C.danger)
+        else
+            Notify:push("Aimbot", "Mode armés désactivé", 2, C.accent)
+        end
+    end, { keybind = "AimOnlyArmed", defaultKey = Enum.KeyCode.Y, keyName = "Y" })
+
+    UI:toggle(t, "🎯 Prioriser les ARMÉS", false, function(v)
         state.prioritizeArmed = v
         if v then
-            Notify:push("Aimbot", "Priorité : joueurs ARMÉS", 2, C.danger)
+            state.onlyArmed = false
+            Notify:push("Aimbot", "Priorité : ARMÉS", 2, C.danger)
         else
-            Notify:push("Aimbot", "Priorité : le plus proche", 2, C.accent)
+            Notify:push("Aimbot", "Priorité : plus proche", 2, C.accent)
         end
     end, { keybind = "AimPriority", defaultKey = Enum.KeyCode.B, keyName = "B" })
+
     UI:slider(t, "  Bonus portée armés", 0, 30, 0, function(v) state.armedRangeBonus = v end)
 
     UI:section(t, "Options")
-    UI:toggle(t, "  Cercle de portée", true, function(v)
-        state.showRange = v
-    end)
+    UI:toggle(t, "  Cercle de portée", true, function(v) state.showRange = v end)
     UI:toggle(t, "  Marqueur cible", true, function(v) state.targetDot = v end)
     UI:toggle(t, "  Team check", true, function(v) state.teamCheck = v end)
     UI:toggle(t, "  Wall check", false, function(v) state.wallCheck = v end)
@@ -2011,10 +1972,8 @@ do
     local function saveProps(part)
         if state.saved[part] then return end
         state.saved[part] = {
-            Color = part.Color,
-            Material = part.Material,
-            Reflectance = part.Reflectance,
-            Transparency = part.Transparency,
+            Color = part.Color, Material = part.Material,
+            Reflectance = part.Reflectance, Transparency = part.Transparency,
             Size = part.Size,
         }
     end
@@ -2039,7 +1998,6 @@ do
         restoreAll()
         local p = PRESETS[key]
         if not p then return end
-
         for _, part in ipairs(getBodyParts()) do
             saveProps(part)
             if p.material then pcall(function() part.Material = p.material end) end
@@ -2090,8 +2048,7 @@ do
         r.Size = UDim2.new(1, 0, 0, 34)
         r.BackgroundTransparency = 1
         local k1, l1, k2, l2 = row[1], row[2], row[3], row[4]
-
-        local function mkBtn(btn, key, label, xPos)
+        local function mkBtn(key, label, xPos)
             local b = Instance.new("TextButton", r)
             b.Size = UDim2.new(0.5, -4, 1, 0)
             b.Position = UDim2.new(xPos, 0, 0, 0)
@@ -2119,8 +2076,8 @@ do
                 end
             end)
         end
-        mkBtn(nil, k1, l1, 0)
-        mkBtn(nil, k2, l2, 0.5)
+        mkBtn(k1, l1, 0)
+        mkBtn(k2, l2, 0.5)
     end
 
     UI:button(t, "↺  Restaurer le skin normal", function()
@@ -2190,15 +2147,13 @@ do
         if type(textureId) ~= "string" then return nil end
         if not string.find(textureId, "rbxassetid://") then return nil end
         if type(buffer) ~= "table" then return nil end
-
         local size = state.sampleSize
         local ok, dominant = pcall(function()
             local ei = AssetService:CreateEditableImage({ Size = Vector2.new(size, size) })
             ei:DrawImage(Vector2.new(0, 0), Vector2.new(size, size), textureId)
             local pixels = ei:ReadPixels(Vector2.new(0, 0), Vector2.new(size, size))
             local counts = {}
-            local total = size * size
-            for i = 0, total - 1 do
+            for i = 0, size * size - 1 do
                 local r = buffer.readu8(pixels, i * 4 + 0)
                 local g = buffer.readu8(pixels, i * 4 + 1)
                 local b = buffer.readu8(pixels, i * 4 + 2)
@@ -2206,9 +2161,7 @@ do
                 if a > 128 then
                     local col = Color3.fromRGB(r, g, b)
                     local base = nearestBase(col)
-                    if base then
-                        counts[base.name] = (counts[base.name] or 0) + 1
-                    end
+                    if base then counts[base.name] = (counts[base.name] or 0) + 1 end
                 end
             end
             local bestName, bestCount = nil, 0
@@ -2338,11 +2291,10 @@ do
     end)
     UI:button(t, "🌍 Toute la map (⚠ lourd)", function()
         state.targetMode = "map"
-        Notify:push("Textures", "Cible : map (lag possible)", 2, C.warn)
+        Notify:push("Textures", "Cible : map", 2, C.warn)
     end)
 
     UI:slider(t, "Précision analyse", 4, 32, 16, function(v) state.sampleSize = v end)
-
     UI:button(t, "↺  Restaurer les textures", function()
         restoreAll()
         Notify:push("Textures", "Restauré", 2, C.success)
@@ -2442,24 +2394,19 @@ do
     local function attachPart(part)
         if state.attached[part] then return end
         state.saved[part] = {
-            Anchored = part.Anchored,
-            CFrame = part.CFrame,
-            CanCollide = part.CanCollide,
+            Anchored = part.Anchored, CFrame = part.CFrame, CanCollide = part.CanCollide,
         }
         part.Anchored = false
         part.CanCollide = false
         part:SetAttribute("PulseVortex", true)
-
         local bp = Instance.new("BodyPosition", part)
         bp.MaxForce = Vector3.new(1e5, 1e5, 1e5)
         bp.P = 15000
         bp.D = 800
-
         local bg = Instance.new("BodyGyro", part)
         bg.MaxTorque = Vector3.new(1e5, 1e5, 1e5)
         bg.P = 1e4
         bg.D = 500
-
         state.attached[part] = {
             bp = bp, bg = bg,
             angle = math.random() * math.pi * 2,
@@ -2496,7 +2443,6 @@ do
         end
         local center = r.Position
         pulse = pulse + dt * state.spinSpeed * 2
-
         core.CFrame = CFrame.new(center)
         local pulseScale = 1 + math.sin(pulse * 2) * 0.1
         core.Size = Vector3.new(3 * pulseScale, 3 * pulseScale, 3 * pulseScale)
@@ -2504,7 +2450,6 @@ do
         halo.CFrame = CFrame.new(center)
         halo.Transparency = state.showCore and 0.85 or 1
         halo.Size = Vector3.new(5 * pulseScale, 5 * pulseScale, 5 * pulseScale)
-
         for i, ring in ipairs(state.ringParts) do
             local phase = pulse + i * (math.pi * 2 / #state.ringParts)
             local tilt = math.rad(state.ringTilt * (i % 2 == 0 and 1 or -1))
@@ -2526,18 +2471,14 @@ do
         local r = root()
         if not r then return end
         local center = r.Position
-
         local toDetach = {}
         for part in pairs(state.attached) do
-            if not part or not part.Parent then
-                table.insert(toDetach, part)
-            end
+            if not part or not part.Parent then table.insert(toDetach, part) end
         end
         for _, p in ipairs(toDetach) do
             state.attached[p] = nil
             state.saved[p] = nil
         end
-
         for part, data in pairs(state.attached) do
             if part and part.Parent then
                 data.angle = data.angle + dt * state.spinSpeed * data.speedMul
@@ -2562,7 +2503,6 @@ do
         local count = 0
         for _ in pairs(state.attached) do count = count + 1 end
         if count >= state.maxObjects then return end
-
         for _, obj in ipairs(workspace:GetDescendants()) do
             if count >= state.maxObjects then break end
             if obj:IsA("BasePart") and isLoose(obj) and not obj:GetAttribute("PulseVortex") then
@@ -2586,12 +2526,10 @@ do
             local ring = createRing(radius, state.ringTilt * (i % 2 == 0 and 1 or -1), state.color)
             table.insert(state.ringParts, ring)
         end
-
         updateConn = RunService.RenderStepped:Connect(function(dt)
             updateRingVisuals(dt)
             updateAttachedObjects(dt)
         end)
-
         if not spawnRunning then
             spawnRunning = true
             task.spawn(function()
@@ -2602,13 +2540,11 @@ do
                 spawnRunning = false
             end)
         end
-
         Notify:push("Vortex", "Activé · rayon " .. state.radius, 3, C.accent)
     end
 
     local function stop()
         if updateConn then updateConn:Disconnect() updateConn = nil end
-
         for part in pairs(state.attached) do
             if part and part.Parent then detachPart(part) end
         end
@@ -2624,14 +2560,12 @@ do
         end
         state.saved = {}
         state.attached = {}
-
         for _, ring in ipairs(state.ringParts) do
             pcall(function() ring:Destroy() end)
         end
         state.ringParts = {}
         core.Transparency = 1
         halo.Transparency = 1
-
         Notify:push("Vortex", "Désactivé", 2, C.warn)
     end
 
@@ -2651,13 +2585,9 @@ do
             end
         end
     end)
-    UI:slider(t, "  Nombre d'anneaux", 1, 8, 3, function(v)
-        state.ringCount = math.floor(v)
-    end)
-
+    UI:slider(t, "  Nombre d'anneaux", 1, 8, 3, function(v) state.ringCount = math.floor(v) end)
     UI:toggle(t, "  Afficher anneaux", true, function(v) state.showRings = v end)
     UI:toggle(t, "  Afficher sphère", true, function(v) state.showCore = v end)
-
     UI:button(t, "💥  Libérer les objets", function()
         for part in pairs(state.attached) do
             if part and part.Parent then detachPart(part) end
@@ -2675,7 +2605,6 @@ do
 
     local targets = {}
     local curTarget = nil
-
     local function refresh()
         targets = {}
         for _, p in ipairs(Players:GetPlayers()) do
@@ -2870,7 +2799,7 @@ end
 -- ═══════════════════════════════════════════════════════════════════
 UI:default()
 task.wait(0.5)
-Notify:push("Pulse Hub", "Chargé · " .. (isMobile and "Mobile" or "PC") .. " · v3.0", 4, C.accent)
+Notify:push("Pulse Hub", "Chargé · " .. (isMobile and "Mobile" or "PC") .. " · v3.1", 4, C.accent)
 task.wait(0.3)
 Notify:push("Astuce", isMobile and "Bouton ⚡ pour l'UI" or "RightShift pour l'UI", 5, C.accentCyan)
-print("[Pulse Hub] v3.0 · " .. (isMobile and "Mobile" or "PC") .. " · Ready")
+print("[Pulse Hub] v3.1 · " .. (isMobile and "Mobile" or "PC") .. " · Ready")
